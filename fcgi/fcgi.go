@@ -3,6 +3,7 @@ package fcgi
 import (
 	"context"
 	"net"
+	"net/http"
 	"net/http/fcgi"
 
 	"github.com/twiglab/twig"
@@ -27,7 +28,9 @@ func (s *FcgiServant) Start() (err error) {
 	}
 
 	go func() {
-		err = fcgi.Serve(s.ln, s.twig)
+		if err = fcgi.Serve(s.ln, s.twig); err != nil {
+			s.twig.Logger.Panic(err)
+		}
 	}()
 
 	return
@@ -39,4 +42,7 @@ func (s *FcgiServant) Shutdown(c context.Context) error {
 
 func (s *FcgiServant) Attach(t *twig.Twig) {
 	s.twig = t
+}
+
+func (s *FcgiServant) Handler(http.Handler) {
 }
